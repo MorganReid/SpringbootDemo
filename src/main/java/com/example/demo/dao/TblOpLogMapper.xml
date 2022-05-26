@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.mapper.TblOpLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.example.demo.domain.TblOpLog">
+        <id column="Id" property="id"/>
+        <result column="AppName" property="appName"/>
+        <result column="ActionType" property="actionType"/>
+        <result column="BusinessId" property="businessId"/>
+        <result column="LogModuleType" property="logModuleType"/>
+        <result column="LogModuleName" property="logModuleName"/>
+        <result column="EntityClass" property="entityClass"/>
+        <result column="Summary" property="summary"/>
+        <result column="Context" property="context"/>
+        <result column="OperatorId" property="operatorId"/>
+        <result column="OperatorName" property="operatorName"/>
+        <result column="OperateTime" property="operateTime"/>
+        <result column="ClientIp" property="clientIp"/>
+        <result column="Ua" property="ua"/>
+        <result column="Remark" property="remark"/>
+        <result column="Deleted" property="deleted"/>
+        <result column="CreateTime" property="createTime"/>
+        <result column="UpdateTime" property="updateTime"/>
+    </resultMap>
+
+</mapper>
