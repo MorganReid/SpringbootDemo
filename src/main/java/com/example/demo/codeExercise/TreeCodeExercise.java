@@ -68,6 +68,41 @@ public class TreeCodeExercise {
         System.out.println(str.substring(1, 2));
         Map<Integer, Integer> map = new HashMap<>();
         codeExercise.maxProfit(arr1);
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        list.add(2);
+        System.out.println(list.get(list.size()));
+
+
+    }
+
+
+    public boolean isValidBST(TreeNode root) {
+        int minValue = Integer.MIN_VALUE;
+        int maxValue = Integer.MAX_VALUE;
+        return isValid(root, minValue, maxValue);
+
+    }
+
+    private boolean isValid(TreeNode root, int minValue, int maxValue) {
+        if (root == null) {
+            return true;
+        }
+        return handleValidBST(root, minValue, maxValue) && isValid(root.left, minValue, root.val) && isValid(root.right, root.val, maxValue);
+
+    }
+
+    public boolean handleValidBST(TreeNode root, int min, int max) {
+        if (root == null) {
+            return true;
+        }
+        if (root.left != null && (root.left.val >= max || root.left.val >= root.val)) {
+            return false;
+        }
+        if (root.right != null && (root.right.val <= min || root.right.val <= root.val)) {
+            return false;
+        }
+        return true;
     }
 
     public int numIslands(char[][] grid) {

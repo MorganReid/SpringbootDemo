@@ -32,8 +32,8 @@ public class MyCrane {
     public static void main(String[] args) throws InterruptedException {
 
         System.out.println(new SimpleDateFormat("HH:mm:ss").format(new Date()));
-        delayQueueTask();
-        //scheduledExecutorServiceTask();
+        //delayQueueTask();
+        scheduledExecutorServiceTask();
 
 
     }
