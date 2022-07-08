@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,7 +51,6 @@ public class test {
 
     @Test
     public void testStuMock() {
-
 
         Student student1 = new Student("hu01", 10L, 1);
         Student student2 = new Student("hu02", 10L, 1);
@@ -87,14 +87,15 @@ public class test {
 
         // 参数捕获
         studentController.testPrinStu(student1);
-        verify(studentServiceMock).printStu(argumentCaptor.capture());
+        verify(studentServiceMock, times(1)).printStu(argumentCaptor.capture());
         assertEquals("hu01", argumentCaptor.getValue().getName());
+//        verifyNoMoreInteractions(studentServiceMock);
 
 
         //执行顺序(验证的操作必须invoked且按照指定顺序invoked)
-        InOrder inOrderSingle = inOrder(linkedListMock);
-        inOrderSingle.verify(linkedListMock).add("mock1");
-        inOrderSingle.verify(linkedListMock).add("mock2");
+        InOrder inOrderSingle = inOrder(studentServiceMock);
+        inOrderSingle.verify(studentServiceMock).selectOne(1);
+        inOrderSingle.verify(studentServiceMock).print();
 
         InOrder inOrder = inOrder(linkedListMock, linkedListSpy);
         inOrder.verify(linkedListMock).add("mock1");

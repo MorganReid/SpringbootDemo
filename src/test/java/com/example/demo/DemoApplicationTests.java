@@ -1,20 +1,12 @@
 package com.example.demo;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -22,21 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 class DemoApplicationTests {
-
-    @Test
-    public void testSelect() {
-        CountDownLatch countDownLatch = new CountDownLatch(2);
-        try {
-
-            new test().test1(countDownLatch);
-            new test().test2(countDownLatch);
-            countDownLatch.await();
-            System.out.println("awaiy");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }
 
     @Test
     public void testCrane() {
