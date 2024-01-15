@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author: hujun
  * @date: 2022/04/01  16:35
- * 链表变成练习
+ * 链表练习
  */
 
 public class ListCodeExeccise {
@@ -81,7 +81,12 @@ public class ListCodeExeccise {
         h.splitListToParts(l1,3);
     }
 
-
+    /**
+     *
+     * @param head
+     * @param k
+     * @return
+     */
     public ListNode[] splitListToParts(ListNode head, int k) {
         int n=0;
         ListNode temp=head;
