@@ -1,3 +1,4 @@
+import com.example.demo.PgpDecryptionUtil;
 import com.example.demo.PgpEncryptionUtil;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
@@ -5,8 +6,10 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -22,7 +25,8 @@ public class clientSend {
     private static final URL publicKey = loadResource("/PUBLIC_KEY_2048.asc");
     private static final URL testFile = loadResource("/test.txt");
     private static final URL testImage = loadResource("/picture.jpeg");
-
+    private static final URL privateKey = loadResource("/PRIVATE_KEY_2048.asc");
+    private static final String passkey = "";
 
     public static void main(String[] args) throws Exception {
         testByteEncryption();
@@ -55,12 +59,17 @@ public class clientSend {
 
 
         // Encrypting the Image
-        File originalImage = new File(testFile.toURI());
+        File originalImage = new File(testImage.toURI());
         ByteArrayOutputStream outputStreamImage = new ByteArrayOutputStream();
         pgpEncryptionUtil.encrypt(outputStreamImage, Files.newInputStream(originalImage.toPath()), originalImage.length(),
                 publicKey.openStream());
         byte[] encryptedImageBytes = outputStreamImage.toByteArray();
 
+        // Encrypting the Image,本地测试可以过,但是网络传输不行
+        PgpDecryptionUtil pgpDecryptionUtil = new PgpDecryptionUtil(privateKey.openStream(), passkey);
+        ByteArrayInputStream encryptedIn = new ByteArrayInputStream(encryptedImageBytes);
+        FileOutputStream fileOutputStream = new FileOutputStream("/home/junhu/temp/decrypt");
+        pgpDecryptionUtil.decrypt(encryptedIn, fileOutputStream);
 
         //发送
         Mqtt5BlockingClient client = Mqtt5Client.builder()
