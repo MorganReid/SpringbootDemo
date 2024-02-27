@@ -46,7 +46,6 @@ public class E2E {
 
     private static final String PROVIDER_BC = "BC";
 
-
     /**
      * Encrypt data to io stream.
      *
@@ -59,11 +58,6 @@ public class E2E {
      */
     public static void encryptToStream(byte[] data, OutputStream out, String fileName, InputStream publicKey) throws IOException, PGPException {
 
-        if (fileName.isEmpty()) {
-            fileName = PGPLiteralData.CONSOLE;
-        }
-
-        //这一步必须
         byte[] compressedData = compressData(data, fileName);
 
         PGPPublicKey pgpPublicKey = readPublicKey(publicKey);
@@ -79,8 +73,6 @@ public class E2E {
 
         encryptOutputStream.write(compressedData);
         encryptOutputStream.close();
-        String s1 = new String(Files.readAllBytes(Paths.get("/home/junhu/temp/template-encrypt.csv")), "UTF-8");
-
     }
 
     /**
@@ -135,6 +127,7 @@ public class E2E {
                 PGPLiteralData pgpLiteralData = (PGPLiteralData) message;
                 InputStream unc = pgpLiteralData.getInputStream();
                 Streams.pipeAll(unc, out);
+
             } else if (message instanceof PGPOnePassSignatureList) {
                 throw new PGPException("encrypted message contains a signed message - not literal data.");
             } else {
@@ -158,13 +151,11 @@ public class E2E {
         }
     }
 
-
     public static byte[] compressData(byte[] data, String fileName) throws IOException {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PGPCompressedDataGenerator pgpCompressedDataGenerator = new PGPCompressedDataGenerator(CompressionAlgorithmTags.ZIP);
         OutputStream compressStream = pgpCompressedDataGenerator.open(byteArrayOutputStream);
-
 
         PGPLiteralDataGenerator pgpLiteralDataGenerator = new PGPLiteralDataGenerator();
         // we want to generate compressed data. This might be a user option later,
@@ -214,93 +205,33 @@ public class E2E {
     }
 
 
-    private static String encrypt() throws Exception {
+    private static void encrypt() throws Exception {
         //要加密的文件名
-        String dataPath = "application.yml";
+        String dataPath = "template.csv";
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(dataPath);
         // 读取classes下pgp文件夹的public key
-        InputStream pubKey = new ClassPathResource("PUBLIC_KEY_2048.asc").getInputStream();
+        InputStream pubKey = new ClassPathResource("pgp/PUBLIC_KEY_2048.asc").getInputStream();
         byte[] encData = toByteArray(inputStream);
         //加密后的文件名
-        FileOutputStream fileOutputStream = new FileOutputStream("/home/junhu/temp/template-encrypt.csv");
+        FileOutputStream fileOutputStream = new FileOutputStream("/home/xianzhang/temp/template-encrypt.csv");
         //加密
-        encData = "hujun000000".getBytes();
-        System.out.println("加密开始");
-        encryptToStream(encData, fileOutputStream, "encry.txt", pubKey);
-        String s1 = new String(Files.readAllBytes(Paths.get("/home/junhu/temp/template-encrypt.csv")), "UTF-8");
-        System.out.println("加密结束" + s1);
-        return s1;
+        encryptToStream(encData, fileOutputStream, "template-encrypt.csv", pubKey);
+        System.out.println("rrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
     }
 
-    private static void decrypt(byte[] encrypt) throws Exception {
-
-        //加密的数据是文件形式
-        File file = new File("/home/junhu/temp/template-encrypt.csv"); // 根据文件路径创建File对象
-        // InputStream encryptedData1 = Thread.currentThread().getContextClassLoader().getResourceAsStream("template-encrypt.csv");
-        InputStream encryptedData = new FileInputStream(file);
-
-        //加密数据是字符串
-        InputStream encryptedData2 = new ByteArrayInputStream(encrypt);
-
+    private static void decrypt() throws Exception {
+        InputStream encryptedData = Thread.currentThread().getContextClassLoader().getResourceAsStream("template-encrypt.csv");
         // 读取classes下pgp文件夹的private key
-        InputStream secretKey = new ClassPathResource("PRIVATE_KEY_2048.asc").getInputStream();
-
-        // 解密后输出为文件
-        FileOutputStream fileOutputStream = new FileOutputStream("/home/junhu/temp/template-decrypt.csv");
-        System.out.println("解密开始");
-        decryptDataToStream(encryptedData2, secretKey, fileOutputStream, "");
-
-        //解密后输出为文件,,可以读取这个文件再转成string.希望是直接解密为string怎么做?
-        String s1 = new String(Files.readAllBytes(Paths.get("/home/junhu/temp/template-decrypt.csv")), "UTF-8");
-        System.out.println("解密结束" + s1);
-    }
-
-
-    public static String convert(InputStream input) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            if (input != null) {
-                input.close();
-            }
-        }
-
-        return stringBuilder.toString();
+        InputStream secretKey = new ClassPathResource("pgp/PRIVATE_KEY_2048.asc").getInputStream();
+        // 解密后的 文件
+        FileOutputStream fileOutputStream = new FileOutputStream("/home/xianzhang/temp/template-decrypt.csv");
+        decryptDataToStream(encryptedData, secretKey, fileOutputStream, "");
     }
 
     public static void main(String[] args) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
-//        String encrypt = encrypt();
-
-        while (true) {
-            final Mqtt5BlockingClient client = Mqtt5Client.builder()
-                    .identifier(UUID.randomUUID().toString())
-                    .serverHost("broker.hivemq.com")
-                    .buildBlocking();
-
-            client.connect();
-
-            try (Mqtt5BlockingClient.Mqtt5Publishes publishes = client.publishes(MqttGlobalPublishFilter.ALL)) {
-
-
-                client.subscribeWith().topicFilter("test/topic").qos(MqttQos.AT_LEAST_ONCE).send();
-
-                Mqtt5Publish publishMessage = publishes.receive();
-                byte[] payloadAsBytes = publishMessage.getPayloadAsBytes();
-                decrypt(payloadAsBytes);
-
-                System.out.println(new String(publishMessage.getPayloadAsBytes(), StandardCharsets.UTF_8));
-            }
-        }
-
+        encrypt();
+        decrypt();
     }
 
 

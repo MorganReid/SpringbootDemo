@@ -36,11 +36,11 @@ public class PgpKeyPairGenerator {
     }
 
     public static void main(String[] args) throws Exception {
-        String path = "/home/junhu/temp/";
+        String path = "/home/xianzhang/temp/";
         System.out.println(path);
         String pubKeyFile = path + "PUBLIC_KEY_2048.asc";
         String priKeyFile = path + "PRIVATE_KEY_2048.asc";
-        generatePGPKeyPair("", "", 2048, pubKeyFile, priKeyFile, path);
+        generatePGPKeyPair("", "", 2048, pubKeyFile,priKeyFile,path);
     }
 
     public static void generatePGPKeyPair(String identity, String passPhrase, int keyWidth,
@@ -102,6 +102,5 @@ public class PgpKeyPairGenerator {
             file.mkdirs();
         }
     }
-
 
 }
