@@ -229,9 +229,28 @@ public class E2E {
     }
 
     public static void main(String[] args) throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
-        encrypt();
-        decrypt();
+//        Security.addProvider(new BouncyCastleProvider());
+//        encrypt();
+//        decrypt();
+
+        while (true) {
+            final Mqtt5BlockingClient client = Mqtt5Client.builder()
+                    .identifier(UUID.randomUUID().toString())
+                    .serverHost("broker.hivemq.com")
+                    .buildBlocking();
+
+            client.connect();
+
+            try (Mqtt5BlockingClient.Mqtt5Publishes publishes = client.publishes(MqttGlobalPublishFilter.ALL)) {
+
+
+                client.subscribeWith().topicFilter("test/topic").qos(MqttQos.AT_LEAST_ONCE).send();
+
+                Mqtt5Publish publishMessage = publishes.receive();
+                byte[] payloadAsBytes = publishMessage.getPayloadAsBytes();
+                System.out.println(new String(publishMessage.getPayloadAsBytes(), StandardCharsets.UTF_8));
+            }
+        }
     }
 
 
