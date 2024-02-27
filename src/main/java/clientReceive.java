@@ -4,9 +4,9 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,13 +38,27 @@ public class clientReceive {
             try (Mqtt5BlockingClient.Mqtt5Publishes publishes = client.publishes(MqttGlobalPublishFilter.ALL)) {
 
 
-                client.subscribeWith().topicFilter("test/topic").qos(MqttQos.AT_LEAST_ONCE).send();
+                System.out.println("开始加密数据接受");
+                client.subscribeWith().topicFilter("test/topic098").qos(MqttQos.AT_LEAST_ONCE).send();
+                byte[] payloadAsBytes = publishes.receive().getPayloadAsBytes();
+                System.out.println("完成加密数据接受");
 
-                System.out.println(new String(publishes.receive().getPayloadAsBytes(), StandardCharsets.UTF_8));
-                byte[] decrypt = pgpDecryptionUtil.decrypt(publishes.receive().getPayloadAsBytes());
+                System.out.println("开始解密");
 
-                String decryptString = new String(decrypt, Charset.defaultCharset());
-                System.out.println("解密后数据" + decryptString);
+                //解密为string
+//                byte[] decrypt = pgpDecryptionUtil.decrypt(payloadAsBytes);
+//                String decryptString = new String(decrypt, Charset.defaultCharset());
+//                System.out.println("完成解密" + decryptString);
+
+                //解密为file
+                ByteArrayInputStream encryptedIn = new ByteArrayInputStream(payloadAsBytes);
+                FileOutputStream fileOutputStream = new FileOutputStream("/home/junhu/temp/decrypt");
+                pgpDecryptionUtil.decrypt(encryptedIn, fileOutputStream);
+
+                System.out.println("完成解密");
+
+
+                //解密为image
 
             }
 

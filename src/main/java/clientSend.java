@@ -1,15 +1,15 @@
-import com.example.demo.PgpDecryptionUtil;
 import com.example.demo.PgpEncryptionUtil;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.openpgp.PGPException;
 
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,20 +19,21 @@ import java.util.UUID;
  */
 public class clientSend {
 
-    public static void main(String[] args) throws PGPException, IOException {
+    private static final URL publicKey = loadResource("/PUBLIC_KEY_2048.asc");
+    private static final URL testFile = loadResource("/test.txt");
+    private static final URL testImage = loadResource("/picture.jpeg");
+
+
+    public static void main(String[] args) throws Exception {
         testByteEncryption();
     }
-
-    private static final URL publicKey = loadResource("/PUBLIC_KEY_2048.asc");
-    private static final URL privateKey = loadResource("/PRIVATE_KEY_2048.asc");
-    private static final String passkey = "";
 
     private static URL loadResource(String resourcePath) {
         return Optional.ofNullable(clientSend.class.getResource(resourcePath))
                 .orElseThrow(() -> new IllegalArgumentException("Resource not found"));
     }
 
-    public static void testByteEncryption() throws IOException, PGPException {
+    public static void testByteEncryption() throws Exception {
 
         PgpEncryptionUtil pgpEncryptionUtil = PgpEncryptionUtil.builder()
                 .armor(true)
@@ -41,12 +42,25 @@ public class clientSend {
                 .withIntegrityCheck(true)
                 .build();
 
-        // Encrypting the test bytes
-        byte[] encryptedBytes = pgpEncryptionUtil.encrypt("testString".getBytes(Charset.defaultCharset()),
+        // Encrypting the String
+        byte[] encryptedStringBytes = pgpEncryptionUtil.encrypt("0227test123".getBytes(Charset.defaultCharset()),
                 publicKey.openStream());
 
-        String s = new String(encryptedBytes, Charset.defaultCharset());
-        System.out.println(s);
+        // Encrypting the File
+        File originalFile = new File(testFile.toURI());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        pgpEncryptionUtil.encrypt(outputStream, Files.newInputStream(originalFile.toPath()), originalFile.length(),
+                publicKey.openStream());
+        byte[] encryptedFileBytes = outputStream.toByteArray();
+
+
+        // Encrypting the Image
+        File originalImage = new File(testFile.toURI());
+        ByteArrayOutputStream outputStreamImage = new ByteArrayOutputStream();
+        pgpEncryptionUtil.encrypt(outputStreamImage, Files.newInputStream(originalImage.toPath()), originalImage.length(),
+                publicKey.openStream());
+        byte[] encryptedImageBytes = outputStreamImage.toByteArray();
+
 
         //发送
         Mqtt5BlockingClient client = Mqtt5Client.builder()
@@ -55,15 +69,10 @@ public class clientSend {
                 .buildBlocking();
 
         client.connect();
-        client.publishWith().topic("test/topic").qos(MqttQos.AT_LEAST_ONCE).payload(encryptedBytes).send();
+        client.publishWith().topic("test/topic098").qos(MqttQos.AT_LEAST_ONCE).payload(encryptedFileBytes).send();
         client.disconnect();
-        System.out.println("11");
+        System.out.println("完成加密数据发送");
 
-        //本地验证解密
-        PgpDecryptionUtil pgpDecryptionUtil = new PgpDecryptionUtil(privateKey.openStream(), passkey);
-        byte[] decrypt = pgpDecryptionUtil.decrypt(encryptedBytes);
-        String decryptString = new String(decrypt, Charset.defaultCharset());
-        System.out.println("解密后数据" + decryptString);
 
     }
 }
