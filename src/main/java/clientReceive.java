@@ -50,15 +50,13 @@ public class clientReceive {
 //                String decryptString = new String(decrypt, Charset.defaultCharset());
 //                System.out.println("完成解密" + decryptString);
 
-                //解密为file
+                //解密为file\image
                 ByteArrayInputStream encryptedIn = new ByteArrayInputStream(payloadAsBytes);
                 FileOutputStream fileOutputStream = new FileOutputStream("/home/junhu/temp/decrypt");
                 pgpDecryptionUtil.decrypt(encryptedIn, fileOutputStream);
 
                 System.out.println("完成解密");
 
-
-                //解密为image
 
             }
 
